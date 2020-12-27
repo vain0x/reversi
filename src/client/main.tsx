@@ -18,6 +18,62 @@ const flipColor = (color: Color): Color => {
   }
 }
 
+const EPS = 1e-6
+
+const idToPos = (id: number): Pos => [Math.floor(id / 8 + EPS), id % 8]
+
+const posToId = (pos: Pos): number => {
+  const [y, x] = pos
+  return y * 8 + x
+}
+
+const posIsValid = (pos: Pos): boolean => {
+  const [y, x] = pos
+  return 0 <= y && y < 8 && 0 <= x && x < 8
+}
+
+type Pos = [number, number]
+
+const posAdd = (l: Pos, r: Pos): Pos => {
+  const [l1, l2] = l
+  const [r1, r2] = r
+  return [l1 + r1, l2 + r2]
+}
+
+// id に石を置いたときにひっくり返る石のリスト。
+const turn = (cells: Array<Color | null>, id: number, active: Color): number[] => {
+  const search = (d: Pos, hit: number[]): number[] => {
+    let p = idToPos(id)
+    while (true) {
+      p = posAdd(p, d)
+      if (!posIsValid(p)) {
+        return []
+      }
+
+      const i = posToId(p)
+      const c = cells[i]
+      if (c == null) {
+        return []
+      }
+
+      if (c === active) {
+        return hit
+      }
+
+      hit.push(posToId(p))
+    }
+  }
+
+  const dx = [1, 1, 0, -1, -1, -1, 0, 1]
+  const dy = [0, 1, 1, 1, 0, -1, -1, -1]
+  const hits: number[] = []
+  for (let i = 0; i < 8; i++) {
+    const hit = search([dy[i], dx[i]], [])
+    hits.push(...hit)
+  }
+  return hits
+}
+
 const newCells = (): Array<Color | null> => {
   const cells: Array<Color | null> = []
   for (let y = 0; y < 8; y++) {
@@ -39,7 +95,6 @@ const newCells = (): Array<Color | null> => {
 }
 
 const ReversiContainer: React.FC = () => {
-
   const [active, setActive] = React.useState("BLACK" as Color)
   const [cells, setCells] = React.useState(newCells())
 
@@ -49,7 +104,15 @@ const ReversiContainer: React.FC = () => {
       return
     }
 
-    setCells(cells => cells.map((color, i) => i === id ? active : color))
+    const hits = turn(cells, id, active)
+    if (hits.length === 0) {
+      return
+    }
+
+    setCells(cells => cells.map((color, i) => (
+      i === id || hits.includes(i)
+        ? active
+        : color)))
     setActive(flipColor(active))
   }, [cells])
 
