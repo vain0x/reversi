@@ -3,18 +3,36 @@ import * as ReactDOM from "react-dom"
 
 type Color = "WHITE" | "BLACK"
 
+const newCells = (): Array<Color | null> => {
+  const cells: Array<Color | null> = []
+  for (let y = 0; y < 8; y++) {
+    for (let x = 0; x < 8; x++) {
+      cells.push(null)
+    }
+  }
+
+  const initial: [number, Color][] = [
+    [27, "BLACK"],
+    [28, "WHITE"],
+    [35, "WHITE"],
+    [36, "BLACK"],
+  ]
+  for (const [i, color] of initial) {
+    cells[i] = color
+  }
+  return cells
+}
+
 const ReversiContainer: React.FC = () => {
   const whiteCount = 2
   const blackCount = 2
 
   const active: Color = "BLACK"
 
-
-
-
+  const [cells, setCells] = React.useState(newCells())
 
   return <article className="g-reversi g-reversi-container">
-    <ReversiBoard />
+    <Board cells={cells} />
 
     <div>白石 {whiteCount}</div>
     <div>黒石 {blackCount}</div>
@@ -22,22 +40,17 @@ const ReversiContainer: React.FC = () => {
   </article>
 }
 
-const ReversiBoard: React.FC = () => {
-  const cells: number[] = []
-  for (let i = 0; i < 8; i++) {
-    cells.push(i)
-  }
+interface ReversiBoardProps {
+  cells: Array<Color | null>
+}
+
+const Board: React.FC<ReversiBoardProps> = props => {
+  const { cells } = props
 
   return (
     <article className="board">
-      {cells.map(y => (
-        <React.Fragment key={y}>
-          {cells.map(x => {
-            const id = y * 3 + x
-            const color = [null, "BLACK", "WHITE"][(y + x) % 3] as Color | null
-            return (<Cell id={id} color={color} />)
-          })}
-        </React.Fragment>
+      {cells.map((color, id) => (
+        <Cell key={id} id={id} color={color} />
       ))}
     </article>
   )

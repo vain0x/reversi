@@ -175,3 +175,7 @@ body,
 .g-reversi .stone[data-color="WHITE"] {
     background-color: white;
 }
+
+.g-reversi .cell:hover {
+    background-color: hsl(120, 80%, 60%);
+}
