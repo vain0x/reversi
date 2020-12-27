@@ -255,14 +255,19 @@ const Board: React.FC<ReversiBoardProps> = props => {
   return (
     <article className="board" onMouseLeave={onMouseLeave}>
       {cells.map((color, id) => {
+        const isCandidate = (prediction[id]?.middles.length ?? 0) !== 0
         const isPredictionTarget = hoveredMiddles.includes(id) || hoveredEnds.includes(id)
+
+        if (isCandidate && id === hoveredCell) {
+          color = active
+        }
 
         return (
           <Cell
             key={id}
             id={id}
             color={color}
-            isCandidate={(prediction[id]?.middles.length ?? 0) !== 0}
+            isCandidate={isCandidate}
             isPredictionTarget={isPredictionTarget}
             hover={hover}
             put={put} />

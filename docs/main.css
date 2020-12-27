@@ -94,27 +94,28 @@ body,
 
 .g-reversi .stone[data-color="BLACK"] {
     background-color: #555;
-    outline-style: #555;
 }
 
 .g-reversi .stone[data-color="WHITE"] {
     background-color: white;
-    outline-style: white;
 }
 
 .g-reversi .cell[data-is-candidate="true"] {
-    outline: 2px dashed hsl(120, 54%, 85%);
+    cursor: pointer;
+}
+
+.g-reversi .cell[data-is-candidate="true"] {
+    outline: 2px dashed white;
     outline-offset: -4px;
 }
 
-.g-reversi .cell[data-is-candidate="true"]:hover {
-    background-color: hsl(120, 80%, 56%);
-}
-
+.g-reversi .cell[data-is-candidate="true"]:hover,
 .g-reversi .cell[data-is-prediction-target="true"] {
-    outline: 2px dashed #ccc;
-    outline-offset: -4px;
-    background-color: hsl(120, 80%, 56%);
+    background-color: hsl(32, 54%, 56%);
+}
+
+.g-reversi .cell[data-is-candidate="true"]:hover .stone {
+    opacity: 0.5;
 }
 
 .g-reversi .winner {
