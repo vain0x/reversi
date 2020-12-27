@@ -5,6 +5,19 @@ const EPS = 1e-6
 const exhaust = (never: never): never => never
 
 // -----------------------------------------------
+// Dim
+// -----------------------------------------------
+
+/**
+ * 盤面の大きさ (通常は 8)
+ */
+export type Dim = number & { [IS_DIM]: true }
+
+declare const IS_DIM: unique symbol
+
+export const DEFAULT_DIM: Dim = 8 as Dim
+
+// -----------------------------------------------
 // Color
 // -----------------------------------------------
 
@@ -37,16 +50,20 @@ export type CellId = number
  */
 export type Pos = [number, number]
 
-const idToPos = (id: CellId): Pos => [Math.floor(id / 8 + EPS), id % 8]
-
-const posToId = (pos: Pos): CellId => {
-  const [y, x] = pos
-  return y * 8 + x
+const idToPos = (id: CellId, dim: Dim): Pos => {
+  const y = Math.floor(id / dim + EPS)
+  const x = id % dim
+  return [y, x]
 }
 
-const posIsValid = (pos: Pos): boolean => {
+const posToId = (pos: Pos, dim: Dim): CellId => {
   const [y, x] = pos
-  return 0 <= y && y < 8 && 0 <= x && x < 8
+  return y * dim + x
+}
+
+const posIsValid = (pos: Pos, dim: Dim): boolean => {
+  const [y, x] = pos
+  return 0 <= y && y < dim && 0 <= x && x < dim
 }
 
 const posAdd = (l: Pos, r: Pos): Pos => {
@@ -59,19 +76,20 @@ const posAdd = (l: Pos, r: Pos): Pos => {
 // newCells
 // -----------------------------------------------
 
-export const newCells = (): Cells => {
+export const newCells = (dim: Dim): Cells => {
   const cells: Cells = []
-  for (let y = 0; y < 8; y++) {
-    for (let x = 0; x < 8; x++) {
+  for (let y = 0; y < dim; y++) {
+    for (let x = 0; x < dim; x++) {
       cells.push(null)
     }
   }
 
+  const k = (dim - 2) / 2
   const initial: [CellId, Color][] = [
-    [27, "BLACK"],
-    [28, "WHITE"],
-    [35, "WHITE"],
-    [36, "BLACK"],
+    [posToId([k + 0, k + 0], dim), "BLACK"],
+    [posToId([k + 0, k + 1], dim), "WHITE"],
+    [posToId([k + 1, k + 0], dim), "WHITE"],
+    [posToId([k + 1, k + 1], dim), "BLACK"],
   ]
   for (const [i, color] of initial) {
     cells[i] = color
@@ -98,16 +116,16 @@ const EMPTY_FLIP_RESULT: FlipResult = {
 /**
  * id に石を置いたときにひっくり返る石のリスト。
  */
-const flippedCells = (cells: Cells, id: CellId, active: Color): FlipResult | null => {
+const flippedCells = (cells: Cells, id: CellId, active: Color, dim: Dim): FlipResult | null => {
   const search = (d: Pos, middles: CellId[]): FlipResult | null => {
-    let p = idToPos(id)
+    let p = idToPos(id, dim)
     while (true) {
       p = posAdd(p, d)
-      if (!posIsValid(p)) {
+      if (!posIsValid(p, dim)) {
         return null
       }
 
-      const i = posToId(p)
+      const i = posToId(p, dim)
       const c = cells[i]
       if (c == null) {
         return null
@@ -120,7 +138,7 @@ const flippedCells = (cells: Cells, id: CellId, active: Color): FlipResult | nul
         return { middles, ends: [i] }
       }
 
-      middles.push(posToId(p))
+      middles.push(posToId(p, dim))
     }
   }
 
@@ -155,13 +173,13 @@ interface PutResult {
   updateCells: (cells: Cells) => Cells
 }
 
-export const put = (cells: Cells, id: number, active: Color): PutResult | null => {
+export const put = (cells: Cells, id: number, active: Color, dim: Dim): PutResult | null => {
   // すでに石があったら置けない
   if (cells[id] != null) {
     return null
   }
 
-  const result = flippedCells(cells, id, active)
+  const result = flippedCells(cells, id, active, dim)
   if (result == null) {
     return null
   }
@@ -195,6 +213,7 @@ export const pass = (state: GameStateDerived): PassResult | null => {
 // -----------------------------------------------
 
 interface GameState {
+  dim: Dim
   active: Color
   cells: Cells
 }
@@ -207,7 +226,7 @@ export interface GameStateDerived extends GameState {
   prediction: FlipResult[]
 }
 
-const getWinner = (blackCount: number, whiteCount: number): Color | null => {
+const getWinner = (blackCount: number, whiteCount: number, dim: Dim): Color | null => {
   if (blackCount == 0) {
     return "WHITE"
   }
@@ -217,7 +236,7 @@ const getWinner = (blackCount: number, whiteCount: number): Color | null => {
   }
 
   // 同数のときは後手の勝ち。
-  if (blackCount + whiteCount === 8 * 8) {
+  if (blackCount + whiteCount === dim * dim) {
     return blackCount > whiteCount ? "BLACK" : "WHITE"
   }
 
@@ -225,24 +244,23 @@ const getWinner = (blackCount: number, whiteCount: number): Color | null => {
 }
 
 export const compute = (state: GameState): GameStateDerived => {
-  const { active, cells } = state
+  const { dim, active, cells } = state
 
   const blackCount = cells.filter(c => c === "BLACK").length
   const whiteCount = cells.filter(c => c === "WHITE").length
 
-  const winner = getWinner(blackCount, whiteCount)
+  const winner = getWinner(blackCount, whiteCount, dim)
 
   const prediction: GameStateDerived["prediction"] = winner == null
-    ? cells.map((_, i) => flippedCells(cells, i, active) ?? EMPTY_FLIP_RESULT)
+    ? cells.map((_, i) => flippedCells(cells, i, active, dim) ?? EMPTY_FLIP_RESULT)
     : cells.map(() => EMPTY_FLIP_RESULT)
 
   const passOnly =
     winner == null
-    && prediction.every(result => result == null)
+    && prediction.every(result => result.middles.length === 0 && result.ends.length === 0)
 
   return {
-    active,
-    cells,
+    ...state,
     blackCount,
     whiteCount,
     prediction,

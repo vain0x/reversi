@@ -3,17 +3,24 @@ import * as M from "./reversi_model"
 import {
   CellId,
   Color,
+  Dim,
   GameStateDerived,
 } from "./reversi_model"
 
-export const ReversiContainer: React.FC = () => {
+interface ReversiContainerProps {
+  dim?: Dim
+}
+
+export const ReversiContainer: React.FC<ReversiContainerProps> = props => {
+  const dim = props.dim ?? M.DEFAULT_DIM
+
   const [active, setActive] = React.useState("BLACK" as Color)
-  const [cells, setCells] = React.useState(M.newCells())
+  const [cells, setCells] = React.useState(M.newCells(dim))
   const [hoveredCell, setHoveredCell] = React.useState<CellId | null>(null)
 
   const state = React.useMemo(() =>
-    M.compute({ active, cells }),
-    [active, cells],
+    M.compute({ dim, active, cells }),
+    [dim, active, cells],
   )
 
   const hover = React.useCallback((id: CellId | null): void => {
@@ -21,19 +28,19 @@ export const ReversiContainer: React.FC = () => {
   }, [])
 
   const put = React.useCallback((id: CellId): void => {
-    const result = M.put(cells, id, active)
+    const result = M.put(cells, id, active, dim)
     if (result != null) {
       setActive(result.updateActive)
       setCells(result.updateCells)
     }
-  }, [active, cells])
+  }, [dim, active, cells])
 
   const pass = React.useCallback(() => {
     const result = M.pass(state)
     if (result != null) {
       setActive(result.updateActive)
     }
-  }, [active, state])
+  }, [dim, active, state])
 
   const { blackCount, whiteCount, passOnly, winner } = state
 
