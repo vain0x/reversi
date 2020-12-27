@@ -25,6 +25,7 @@ h6 {
 html {
     /* 1rem = 10px */
     font-size: 62.5%;
+
 }
 
 /* スマートフォン用 */
@@ -33,7 +34,6 @@ html {
         font-size: 50%;
     }
 }
-
 body {
     font-size: 1.6rem;
     font-family: sans-serif;
@@ -114,8 +114,58 @@ textarea {
     main
 */
 
-#main-layout > header,
-#main-layout > article,
-#main-layout > footer {
-    padding: 1.6rem 2.4rem;
+html,
+body,
+#app-container,
+#main {
+    display: flex;
+    flex-flow: column nowrap;
+    flex: 1;
+    height: 100%;
+}
+
+#app-container {
+    align-items: center;
+}
+
+/* タブレット用 */
+@media (min-width: 600px) {
+    #main {
+        padding: 1.6rem 2.4rem;
+        max-width: 640px;
+    }
+}
+
+
+
+/*
+    Board
+*/
+
+.g-reversi-board {
+    border: 2px solid #555;
+    background-color: #5c5;
+    border-radius: 8px;
+
+    display: grid;
+    grid-template-columns: repeat(8, auto);
+}
+
+.g-reversi-board .cell {
+    border: 1px solid #555;
+    padding: 0.4rem;
+}
+
+.g-reversi-board .stone {
+    border-radius: 4rem;
+    width: 2rem;
+    height: 2rem;
+}
+
+.g-reversi-board .stone[data-color="black"] {
+    background-color: #555;
+}
+
+.g-reversi-board .stone[data-color="white"] {
+    background-color: white;
 }
