@@ -4,6 +4,7 @@
 const path = require("path")
 
 const DOCS_DIR = path.resolve(__dirname, "docs")
+const SRC_DIR = path.resolve(__dirname, "src")
 const TSCONFIG_PATH = path.resolve(__dirname, "tsconfig.json")
 
 module.exports = {
@@ -42,5 +43,16 @@ module.exports = {
   externals: {
     "react": "React",
     "react-dom": "ReactDOM",
+  },
+
+  // webpack serve
+  devServer: {
+    contentBase: [
+      DOCS_DIR,
+      SRC_DIR,
+    ],
+    hot: false,
+    liveReload: true,
+    watchContentBase: true,
   },
 }
