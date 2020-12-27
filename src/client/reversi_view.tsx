@@ -46,7 +46,7 @@ export const ReversiContainer: React.FC<ReversiContainerProps> = props => {
 
   return (
     <article className="g-reversi g-reversi-container">
-      <Board
+      <ReversiBoard
         state={state}
         hoveredCell={hoveredCell}
         hover={hover}
@@ -87,7 +87,7 @@ interface ReversiBoardProps {
   put: (id: number) => void
 }
 
-const Board: React.FC<ReversiBoardProps> = props => {
+export const ReversiBoard: React.FC<ReversiBoardProps> = props => {
   const { state, hoveredCell, hover, put } = props
   const { active, cells, prediction } = state
 

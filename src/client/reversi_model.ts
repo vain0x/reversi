@@ -66,7 +66,7 @@ const posIsValid = (pos: Pos, dim: Dim): boolean => {
   return 0 <= y && y < dim && 0 <= x && x < dim
 }
 
-const posAdd = (l: Pos, r: Pos): Pos => {
+export const posAdd = (l: Pos, r: Pos): Pos => {
   const [l1, l2] = l
   const [r1, r2] = r
   return [l1 + r1, l2 + r2]
@@ -268,3 +268,10 @@ export const compute = (state: GameState): GameStateDerived => {
     winner,
   }
 }
+
+export const freeze = (state: GameStateDerived): GameStateDerived =>
+  ({
+    ...state,
+    passOnly: false,
+    prediction: state.cells.map(() => EMPTY_FLIP_RESULT),
+  })
