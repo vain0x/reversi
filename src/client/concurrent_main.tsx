@@ -69,6 +69,7 @@ const ConcurrentReversiContainer = () => {
           color == null ? (
             <Division
               id={id}
+              key={id}
               active={active}
               readonly={winner != null}
               setActive={setActive}
