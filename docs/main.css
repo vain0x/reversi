@@ -1,0 +1,124 @@
+/*
+    Reset
+*/
+
+body,
+html {
+    padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    padding: 0;
+    font-size: inherit;
+    font-weight: inherit;
+}
+
+/*
+    Fonts
+*/
+
+html {
+    /* 1rem = 10px */
+    font-size: 62.5%;
+
+}
+
+/* スマートフォン用 */
+@media (max-width: 360px) {
+    html {
+        font-size: 50%;
+    }
+}
+
+body {
+    font-size: 1.6rem;
+    font-family: sans-serif;
+}
+
+
+
+/*
+    main
+*/
+
+html,
+body,
+#app-container,
+#main {
+    display: flex;
+    flex-flow: column nowrap;
+    flex: 1;
+    height: 100%;
+}
+
+#app-container {
+    align-items: center;
+}
+
+
+
+.g-reversi-container {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+}
+
+/*
+    Board
+*/
+
+.g-reversi .board {
+    border: 2px solid #555;
+    background-color: #5c5;
+    border-radius: 8px;
+
+    display: grid;
+    grid-template-columns: repeat(8, auto);
+}
+
+.g-reversi .cell {
+    border: 1px solid #555;
+    padding: 0.4rem;
+}
+
+.g-reversi .stone {
+    border-radius: 4rem;
+    width: 3.2rem;
+    height: 3.2rem;
+}
+
+.g-reversi .stone[data-color="BLACK"] {
+    background-color: #555;
+}
+
+.g-reversi .stone[data-color="WHITE"] {
+    background-color: white;
+}
+
+.g-reversi .cell[data-is-candidate="true"] {
+    cursor: pointer;
+}
+
+.g-reversi .cell[data-is-candidate="true"] {
+    outline: 2px dashed white;
+    outline-offset: -4px;
+}
+
+.g-reversi .cell[data-is-candidate="true"]:hover,
+.g-reversi .cell[data-is-prediction-target="true"] {
+    background-color: hsl(32, 54%, 56%);
+}
+
+.g-reversi .cell[data-is-candidate="true"]:hover .stone {
+    opacity: 0.5;
+}
+
+.g-reversi .winner {
+    font-weight: bold;
+    color: #5c5;
+}
