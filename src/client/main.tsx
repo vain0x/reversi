@@ -3,6 +3,21 @@ import * as ReactDOM from "react-dom"
 
 type Color = "WHITE" | "BLACK"
 
+const exhaust = (never: never): never => never
+
+const flipColor = (color: Color): Color => {
+  switch (color) {
+    case "WHITE":
+      return "BLACK"
+
+    case "BLACK":
+      return "WHITE"
+
+    default:
+      throw exhaust(color)
+  }
+}
+
 const newCells = (): Array<Color | null> => {
   const cells: Array<Color | null> = []
   for (let y = 0; y < 8; y++) {
@@ -24,15 +39,32 @@ const newCells = (): Array<Color | null> => {
 }
 
 const ReversiContainer: React.FC = () => {
-  const whiteCount = 2
-  const blackCount = 2
 
-  const active: Color = "BLACK"
-
+  const [active, setActive] = React.useState("BLACK" as Color)
   const [cells, setCells] = React.useState(newCells())
 
+  const put = React.useCallback((id: number): void => {
+    // すでに石があったら置けない
+    if (cells[id] != null) {
+      return
+    }
+
+    setCells(cells => cells.map((color, i) => i === id ? active : color))
+    setActive(flipColor(active))
+  }, [cells])
+
+  const whiteCount = React.useMemo(() =>
+    cells.filter(c => c === "WHITE").length,
+    [cells],
+  )
+
+  const blackCount = React.useMemo(() =>
+    cells.filter(c => c === "BLACK").length,
+    [cells],
+  )
+
   return <article className="g-reversi g-reversi-container">
-    <Board cells={cells} />
+    <Board cells={cells} put={put} />
 
     <div>白石 {whiteCount}</div>
     <div>黒石 {blackCount}</div>
@@ -42,15 +74,16 @@ const ReversiContainer: React.FC = () => {
 
 interface ReversiBoardProps {
   cells: Array<Color | null>
+  put: (id: number) => void
 }
 
 const Board: React.FC<ReversiBoardProps> = props => {
-  const { cells } = props
+  const { cells, put } = props
 
   return (
     <article className="board">
       {cells.map((color, id) => (
-        <Cell key={id} id={id} color={color} />
+        <Cell key={id} id={id} color={color} put={put} />
       ))}
     </article>
   )
@@ -59,12 +92,18 @@ const Board: React.FC<ReversiBoardProps> = props => {
 interface ReversiCellProps {
   id: number
   color: Color | null
+  put: (id: number) => void
 }
 
 const Cell: React.FC<ReversiCellProps> = props => {
-  const { id, color } = props
+  const { id, color, put } = props
+
+  const onClick = React.useCallback(() => {
+    put(id)
+  }, [id, put])
+
   return (
-    <div key={id} className="cell">
+    <div key={id} className="cell" onClick={onClick}>
       <div className="stone" data-color={color} />
     </div>
   )
