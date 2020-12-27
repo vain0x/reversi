@@ -168,10 +168,10 @@ body,
     height: 2rem;
 }
 
-.g-reversi .stone[data-color="black"] {
+.g-reversi .stone[data-color="BLACK"] {
     background-color: #555;
 }
 
-.g-reversi .stone[data-color="white"] {
+.g-reversi .stone[data-color="WHITE"] {
     background-color: white;
 }
