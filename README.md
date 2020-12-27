@@ -2,6 +2,6 @@
 
 リバーシです。
 
-- 遊ぶ: <https://vain0x.github.io/reversi/index.html>
+- 遊ぶ: <https://vain0x.github.io/reversi/>
 
 ![Reversi Screenshot](./assets/screenshot.png)
