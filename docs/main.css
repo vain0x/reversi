@@ -29,7 +29,7 @@ html {
 }
 
 /* スマートフォン用 */
-@media (max-width: 320px) {
+@media (max-width: 360px) {
     html {
         font-size: 50%;
     }
@@ -88,8 +88,8 @@ body,
 
 .g-reversi .stone {
     border-radius: 4rem;
-    width: 2rem;
-    height: 2rem;
+    width: 3.2rem;
+    height: 3.2rem;
 }
 
 .g-reversi .stone[data-color="BLACK"] {
