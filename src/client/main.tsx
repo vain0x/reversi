@@ -64,6 +64,10 @@ const turn = (cells: Array<Color | null>, id: number, active: Color): number[] =
     }
   }
 
+  if (cells[id] != null) {
+    return []
+  }
+
   const dx = [1, 1, 0, -1, -1, -1, 0, 1]
   const dy = [0, 1, 1, 1, 0, -1, -1, -1]
   const hits: number[] = []
@@ -126,8 +130,13 @@ const ReversiContainer: React.FC = () => {
     [cells],
   )
 
+  const prediction = React.useMemo(() =>
+    cells.map((_, i) => turn(cells, i, active)),
+    [cells],
+  )
+
   return <article className="g-reversi g-reversi-container">
-    <Board cells={cells} put={put} />
+    <Board cells={cells} prediction={prediction} put={put} />
 
     <div>白石 {whiteCount}</div>
     <div>黒石 {blackCount}</div>
@@ -137,16 +146,17 @@ const ReversiContainer: React.FC = () => {
 
 interface ReversiBoardProps {
   cells: Array<Color | null>
+  prediction: number[][]
   put: (id: number) => void
 }
 
 const Board: React.FC<ReversiBoardProps> = props => {
-  const { cells, put } = props
+  const { cells, prediction, put } = props
 
   return (
     <article className="board">
       {cells.map((color, id) => (
-        <Cell key={id} id={id} color={color} put={put} />
+        <Cell key={id} id={id} color={color} prediction={prediction[id]} put={put} />
       ))}
     </article>
   )
@@ -155,19 +165,20 @@ const Board: React.FC<ReversiBoardProps> = props => {
 interface ReversiCellProps {
   id: number
   color: Color | null
+  prediction: number[]
   put: (id: number) => void
 }
 
 const Cell: React.FC<ReversiCellProps> = props => {
-  const { id, color, put } = props
+  const { id, color, prediction, put } = props
 
   const onClick = React.useCallback(() => {
     put(id)
   }, [id, put])
 
   return (
-    <div key={id} className="cell" onClick={onClick}>
-      <div className="stone" data-color={color} />
+    <div key={id} className="cell" onClick={onClick} data-can-put={prediction.length !== 0}>
+      <div className="stone" data-color={color}  />
     </div>
   )
 }

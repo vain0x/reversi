@@ -179,3 +179,7 @@ body,
 .g-reversi .cell:hover {
     background-color: hsl(120, 80%, 60%);
 }
+
+.g-reversi .cell[data-can-put="true"] {
+    background-color: hsl(120, 54%, 80%);
+}
