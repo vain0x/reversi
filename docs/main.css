@@ -170,16 +170,25 @@ body,
 
 .g-reversi .stone[data-color="BLACK"] {
     background-color: #555;
+    outline-style: #555;
 }
 
 .g-reversi .stone[data-color="WHITE"] {
     background-color: white;
+    outline-style: white;
 }
 
-.g-reversi .cell:hover {
-    background-color: hsl(120, 80%, 60%);
+.g-reversi .cell[data-is-candidate="true"] {
+    outline: 2px dashed hsl(120, 54%, 85%);
+    outline-offset: -4px;
 }
 
-.g-reversi .cell[data-can-put="true"] {
-    background-color: hsl(120, 54%, 80%);
+.g-reversi .cell[data-is-candidate="true"]:hover {
+    background-color: hsl(120, 80%, 56%);
+}
+
+.g-reversi .cell[data-is-prediction-target="true"] {
+    outline: 2px dashed #ccc;
+    outline-offset: -4px;
+    background-color: hsl(120, 80%, 56%);
 }

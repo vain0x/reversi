@@ -40,42 +40,58 @@ const posAdd = (l: Pos, r: Pos): Pos => {
   return [l1 + r1, l2 + r2]
 }
 
+type FlipResult = {
+  middles: number[]
+  ends: number[]
+}
+
 // id に石を置いたときにひっくり返る石のリスト。
-const turn = (cells: Array<Color | null>, id: number, active: Color): number[] => {
-  const search = (d: Pos, hit: number[]): number[] => {
+const flippedCells = (cells: Array<Color | null>, id: number, active: Color): FlipResult | null => {
+  const search = (d: Pos, middles: number[]): FlipResult | null => {
     let p = idToPos(id)
     while (true) {
       p = posAdd(p, d)
       if (!posIsValid(p)) {
-        return []
+        return null
       }
 
       const i = posToId(p)
       const c = cells[i]
       if (c == null) {
-        return []
+        return null
       }
 
       if (c === active) {
-        return hit
+        if (middles.length == 0) {
+          return null
+        }
+        return { middles, ends: [i] }
       }
 
-      hit.push(posToId(p))
+      middles.push(posToId(p))
     }
   }
 
   if (cells[id] != null) {
-    return []
+    return null
   }
 
   const dx = [1, 1, 0, -1, -1, -1, 0, 1]
   const dy = [0, 1, 1, 1, 0, -1, -1, -1]
-  const hits: number[] = []
+  const middles: number[] = []
+  const ends: number[] = []
   for (let i = 0; i < 8; i++) {
-    const hit = search([dy[i], dx[i]], [])
-    hits.push(...hit)
+    const result = search([dy[i], dx[i]], [])
+    if (result != null) {
+      middles.push(...result.middles)
+      ends.push(...result.ends)
+    }
   }
-  return hits
+
+  if (middles.length === 0) {
+    return null
+  }
+  return { middles: middles, ends }
 }
 
 const newCells = (): Array<Color | null> => {
@@ -102,23 +118,29 @@ const ReversiContainer: React.FC = () => {
   const [active, setActive] = React.useState("BLACK" as Color)
   const [cells, setCells] = React.useState(newCells())
 
+  const [hoveredCell, setHoveredCell] = React.useState<number | null>(null)
+
+  const hover = React.useCallback((id: number | null): void => {
+    setHoveredCell(id)
+  }, [])
+
   const put = React.useCallback((id: number): void => {
     // すでに石があったら置けない
     if (cells[id] != null) {
       return
     }
 
-    const hits = turn(cells, id, active)
-    if (hits.length === 0) {
+    const result = flippedCells(cells, id, active)
+    if (result == null) {
       return
     }
 
     setCells(cells => cells.map((color, i) => (
-      i === id || hits.includes(i)
+      i === id || result.middles.includes(i)
         ? active
         : color)))
     setActive(flipColor(active))
-  }, [cells])
+  }, [active, cells])
 
   const whiteCount = React.useMemo(() =>
     cells.filter(c => c === "WHITE").length,
@@ -131,12 +153,18 @@ const ReversiContainer: React.FC = () => {
   )
 
   const prediction = React.useMemo(() =>
-    cells.map((_, i) => turn(cells, i, active)),
-    [cells],
+    cells.map((_, i) => flippedCells(cells, i, active)),
+    [active, cells],
   )
 
   return <article className="g-reversi g-reversi-container">
-    <Board cells={cells} prediction={prediction} put={put} />
+    <Board
+      active={active}
+      cells={cells}
+      prediction={prediction}
+      hoveredCell={hoveredCell}
+      hover={hover}
+      put={put} />
 
     <div>白石 {whiteCount}</div>
     <div>黒石 {blackCount}</div>
@@ -145,19 +173,51 @@ const ReversiContainer: React.FC = () => {
 }
 
 interface ReversiBoardProps {
+  active: Color
   cells: Array<Color | null>
-  prediction: number[][]
+  prediction: (FlipResult | null)[]
+  hoveredCell: number | null
+  hover: (id: number | null) => void
   put: (id: number) => void
 }
 
 const Board: React.FC<ReversiBoardProps> = props => {
-  const { cells, prediction, put } = props
+  const { active, cells, prediction, hoveredCell, hover, put } = props
+
+  const onMouseLeave = React.useCallback(() => {
+    hover(null)
+  }, [hover])
+
+  const hoveredMiddles = React.useMemo(() =>
+    hoveredCell != null && prediction[hoveredCell] != null
+      ? prediction[hoveredCell]?.middles ?? []
+      : [],
+    [hoveredCell, prediction],
+  )
+
+  const hoveredEnds = React.useMemo(() =>
+    hoveredCell != null && prediction[hoveredCell] != null
+      ? prediction[hoveredCell]?.ends ?? []
+      : [],
+    [hoveredCell, prediction],
+  )
 
   return (
-    <article className="board">
-      {cells.map((color, id) => (
-        <Cell key={id} id={id} color={color} prediction={prediction[id]} put={put} />
-      ))}
+    <article className="board" onMouseLeave={onMouseLeave}>
+      {cells.map((color, id) => {
+        const isPredictionTarget = hoveredMiddles.includes(id) || hoveredEnds.includes(id)
+
+        return (
+          <Cell
+            key={id}
+            id={id}
+            color={color}
+            isCandidate={(prediction[id]?.middles.length ?? 0) !== 0}
+            isPredictionTarget={isPredictionTarget}
+            hover={hover}
+            put={put} />
+        )
+      })}
     </article>
   )
 }
@@ -165,20 +225,34 @@ const Board: React.FC<ReversiBoardProps> = props => {
 interface ReversiCellProps {
   id: number
   color: Color | null
-  prediction: number[]
+  isCandidate: boolean
+  isPredictionTarget: boolean
+  hover: (id: number | null) => void
   put: (id: number) => void
 }
 
 const Cell: React.FC<ReversiCellProps> = props => {
-  const { id, color, prediction, put } = props
+  const { id, color, isCandidate, isPredictionTarget, hover, put } = props
 
   const onClick = React.useCallback(() => {
     put(id)
   }, [id, put])
 
+  const onMouseEnter = React.useCallback(() => {
+    hover(id)
+  }, [id, hover])
+
   return (
-    <div key={id} className="cell" onClick={onClick} data-can-put={prediction.length !== 0}>
-      <div className="stone" data-color={color}  />
+    <div
+      key={id}
+      className="cell"
+      onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      data-is-candidate={isCandidate}
+      data-is-prediction-target={isPredictionTarget}>
+      <div
+        className="stone"
+        data-color={color} />
     </div>
   )
 }
