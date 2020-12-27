@@ -152,14 +152,30 @@ const ReversiContainer: React.FC = () => {
     [cells],
   )
 
+  const winner: Color | null = React.useMemo(() => {
+    if (blackCount == 0) {
+      return "WHITE"
+     }
+
+     if (whiteCount === 0) {
+       return "BLACK"
+     }
+
+     if (blackCount + whiteCount === 8 * 8) {
+       return blackCount > whiteCount  ? "BLACK" : "WHITE"
+     }
+
+     return null
+  }, [whiteCount, blackCount])
+
   const prediction = React.useMemo(() =>
     cells.map((_, i) => flippedCells(cells, i, active)),
     [active, cells],
   )
 
   const passOnly = React.useMemo(() =>
-    prediction.every(result => result == null),
-    [prediction],
+    winner == null && prediction.every(result => result == null),
+    [prediction, winner],
   )
 
   const pass = React.useCallback(() => {
@@ -168,31 +184,42 @@ const ReversiContainer: React.FC = () => {
     }
   }, [active, passOnly])
 
-  return <article className="g-reversi g-reversi-container">
-    <Board
-      active={active}
-      cells={cells}
-      prediction={prediction}
-      hoveredCell={hoveredCell}
-      hover={hover}
-      put={put} />
+  return (
+    <article className="g-reversi g-reversi-container">
+      <Board
+        active={active}
+        cells={cells}
+        prediction={prediction}
+        hoveredCell={hoveredCell}
+        hover={hover}
+        put={put} />
 
-    <div>白石 {whiteCount}</div>
-    <div>黒石 {blackCount}</div>
-    <div>手番: {active === "BLACK" ? "黒" : "白"}</div>
+      <div>白石 {whiteCount}</div>
+      <div>黒石 {blackCount}</div>
 
-    {passOnly ? (
-      <>
+      {winner == null ? (
         <div>
-          石を置く場所がありません。
+          手番: {active === "BLACK" ? "黒" : "白"}
         </div>
+      ) : (
+        <div className="winner">
+          勝者: {winner === "BLACK" ? "黒" : "白"}
+        </div>
+      )}
 
-        <button type="button" onClick={pass}>
-          パス
-        </button>
-      </>
-    ) : null }
-  </article>
+      {passOnly ? (
+        <>
+          <div>
+            石を置く場所がありません。
+          </div>
+
+          <button type="button" onClick={pass}>
+            パス
+          </button>
+        </>
+      ) : null }
+    </article>
+  )
 }
 
 interface ReversiBoardProps {

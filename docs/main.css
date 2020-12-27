@@ -192,3 +192,8 @@ body,
     outline-offset: -4px;
     background-color: hsl(120, 80%, 56%);
 }
+
+.g-reversi .winner {
+    font-weight: bold;
+    color: #5c5;
+}
