@@ -8,10 +8,13 @@ const SRC_DIR = path.resolve(__dirname, "src")
 const TSCONFIG_PATH = path.resolve(__dirname, "tsconfig.json")
 
 module.exports = {
-  entry: "./src/client.ts",
+  entry: {
+    bundle: "./src/regular.ts",
+    "concurrent/bundle": "./src/concurrent.ts",
+  },
 
   output: {
-    filename: "bundle.js",
+    filename: "[name].js",
     path: DOCS_DIR,
   },
 
