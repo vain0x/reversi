@@ -1,0 +1,121 @@
+/*
+    Reset
+*/
+
+body,
+html {
+    padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    padding: 0;
+    font-size: inherit;
+    font-weight: inherit;
+}
+
+/*
+    Fonts
+*/
+
+html {
+    /* 1rem = 10px */
+    font-size: 62.5%;
+}
+
+/* スマートフォン用 */
+@media (max-width: 320px) {
+    html {
+        font-size: 50%;
+    }
+}
+
+body {
+    font-size: 1.6rem;
+    font-family: sans-serif;
+}
+
+body,
+button,
+input,
+optgroup,
+select,
+textarea {
+    line-height: 1.5;
+}
+
+
+
+/*
+    Stack コンテナ
+*/
+
+.g-flex-row {
+    display: flex;
+    flex-flow: row nowrap;
+    gap: 1.6rem;
+}
+
+.g-flex-column {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 2.4rem;
+}
+
+.g-flex-row > .flex-stretch,
+.g-flex-column > .flex-stretch {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.g-flex-row > .flex-cross-center,
+.g-flex-column > .flex-cross-center {
+    align-self: center;
+}
+
+
+
+/*
+    Center
+*/
+
+.g-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
+/*
+    Cluster
+*/
+
+.g-cluster {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+
+    margin-bottom: -1.6rem;
+}
+
+.g-cluster > * {
+    margin-right: 0.8rem;
+    margin-bottom: 1.6rem;
+}
+
+
+
+/*
+    main
+*/
+
+#main-layout > header,
+#main-layout > article,
+#main-layout > footer {
+    padding: 1.6rem 2.4rem;
+}
