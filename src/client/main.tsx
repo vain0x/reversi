@@ -157,6 +157,17 @@ const ReversiContainer: React.FC = () => {
     [active, cells],
   )
 
+  const passOnly = React.useMemo(() =>
+    prediction.every(result => result == null),
+    [prediction],
+  )
+
+  const pass = React.useCallback(() => {
+    if (passOnly) {
+      setActive(flipColor(active))
+    }
+  }, [active, passOnly])
+
   return <article className="g-reversi g-reversi-container">
     <Board
       active={active}
@@ -169,6 +180,18 @@ const ReversiContainer: React.FC = () => {
     <div>白石 {whiteCount}</div>
     <div>黒石 {blackCount}</div>
     <div>手番: {active === "BLACK" ? "黒" : "白"}</div>
+
+    {passOnly ? (
+      <>
+        <div>
+          石を置く場所がありません。
+        </div>
+
+        <button type="button" onClick={pass}>
+          パス
+        </button>
+      </>
+    ) : null }
   </article>
 }
 
