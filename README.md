@@ -3,14 +3,14 @@
 ブラウザ上で遊べるリバーシです。(手動操作のみ。)
 
 - [普通のリバーシ](https://vain0x.github.io/reversi/)
-- [平行リバーシ](https://vain0x.github.io/reversi/concurrent/)
+- [並行リバーシ](https://vain0x.github.io/reversi/concurrent/)
     - 6x6 リバーシの結果で三目並べをする
 
 ## 普通のリバーシ
 
 ![Reversi Screenshot](./assets/screenshot.png)
 
-## 平行リバーシ
+## 並行リバーシ
 
 ![Concurrent Reversi Snapshot](./assets/screenshot-concurrent.gif)
 
